@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/arnav28/drl_agent_ws/install/velodyne_gazebo_plugins/include/**",
+        "/home/arnav28/drl_agent_ws/install/drl_agent_interfaces/include/**",
+        "/home/arnav28/ros2_ws/install/v4l2_camera/include/**",
+        "/home/arnav28/ros2_ws/install/micro_ros_agent/include/**",
+        "/home/arnav28/ros2_ws/install/micro_ros_msgs/include/**",
+        "/home/arnav28/gz_ros2_control_ws/install/gz_ros2_control/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/arnav28/drl_agent_ws/src/velodyne_simulator/velodyne_gazebo_plugins/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

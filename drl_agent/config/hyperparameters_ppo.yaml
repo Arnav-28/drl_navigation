@@ -1,0 +1,17 @@
+
+hyperparameters:
+  # PPO specific parameters
+  lr_actor: 3.0e-4          # Actor learning rate
+  lr_critic: 1.0e-3         # Critic learning rate
+  gamma: 0.99               # Discount factor
+  eps_clip: 0.2             # PPO clipping parameter
+  K_epochs: 4               # Number of PPO epochs per update
+  gae_lambda: 0.95          # GAE lambda parameter
+
+  # Network architecture
+  hidden_dim: 256           # Hidden layer size
+
+  # Training parameters
+  trajectory_length: 2048   # Length of trajectory to collect
+  batch_size: 64           # Mini-batch size for updates
+  max_episodes: 20000       # Maximum training episodes

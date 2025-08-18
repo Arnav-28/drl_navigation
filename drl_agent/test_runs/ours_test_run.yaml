@@ -1,0 +1,5 @@
+test_metrics:
+  average_distance: 13.46
+  average_time: 17.615
+  collision_rate: 0.4
+  success_rate: 0.6
