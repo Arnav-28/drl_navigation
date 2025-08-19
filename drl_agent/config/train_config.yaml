@@ -5,6 +5,6 @@ train_settings:
   timesteps_before_training: 25000
   eval_freq: 5000
   eval_eps: 10
-  max_timesteps: 100000
+  max_timesteps: 1000000
   max_episode_steps: 250
   base_file_name: "td3_agent"
