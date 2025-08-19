@@ -53,7 +53,7 @@ class TrainPPO(EnvInterface):
         )
 
         # Setup directories for saving models, results and logs
-        temp_dir_path = os.path.join(drl_agent_src_path, "drl_agent", "temp")
+        temp_dir_path = os.path.join(drl_agent_src_path, "drl_agent", "temp_ppo")
         self.pytorch_models_dir = os.path.join(temp_dir_path, "pytorch_models")
         self.final_models_dir = os.path.join(temp_dir_path, "final_models")
         self.results_dir = os.path.join(temp_dir_path, "results")
@@ -146,9 +146,6 @@ class TrainPPO(EnvInterface):
 
         # In your TrainPPO class, which you would rename to TrainPPO
     def train_online(self):
-
-        rclpy.spin_once(self, timeout_sec=0)
-
         """ Train the PPO agent online """
         # Create an instance of our new PPOAgent
         # self.rl_agent = Agent(self.state_dim, self.action_dim, self.max_action, hyperparameters)
@@ -162,42 +159,17 @@ class TrainPPO(EnvInterface):
             # Get action and value from the PPO agent
             action, log_prob, _, value = self.rl_agent.get_action_and_value(state.reshape(1,-1))
 
-
             # Act in the environment
             # Note: PPO's actions are sampled, so we pass the numpy version to the env
-            next_state, reward, env_done, _ = self.step(action.cpu().numpy().flatten())
+            next_state, reward, done, _ = self.step(action.cpu().numpy().flatten())
 
-            # --- MINIMAL CHANGE IS HERE ---
-            # Check if the episode is ending due to timeout.
-            # ep_timesteps is 0-indexed, so we check against max_episode_steps - 1
-            timeout = ep_timesteps >= self.max_episode_steps - 1
-
-            # The 'done' signal for the agent's learning algorithm.
-            # Treat a timeout as a terminal state (like a collision) for learning purposes.
-            agent_done = env_done or timeout
-            # ----------------------------
-
-            # Store the collected experience using the MODIFIED 'done' flag
-            self.rl_agent.store_transition(state, action.flatten(), log_prob.flatten(), reward, agent_done, value)
+            # Store the collected experience
+            self.rl_agent.store_transition(state, action.flatten(), log_prob.flatten(), reward, done, value)
 
             ep_total_reward += reward
             ep_timesteps += 1
 
-            # The overall episode check can now use the agent_done flag
-            episode_is_done = agent_done
-            
-            # # Act in the environment
-            # # Note: PPO's actions are sampled, so we pass the numpy version to the env
-            # next_state, reward, done, _ = self.step(action.cpu().numpy().flatten())
-
-            # # Store the collected experience
-            # self.rl_agent.store_transition(state, action.flatten(), log_prob.flatten(), reward, done, value)
-
-            # ep_total_reward += reward
-            # ep_timesteps += 1
-
-            # episode_is_done = done or (ep_timesteps >= self.max_episode_steps)
-
+            episode_is_done = done or (ep_timesteps >= self.max_episode_steps)
             state = torch.tensor(next_state, dtype=torch.float32, device=self.rl_agent.device)
             if episode_is_done:
                 self.get_logger().info(f"Total T: {t+1} Episode Num: {ep_num} Episode T: {ep_timesteps} Reward: {ep_total_reward:.3f}")
@@ -213,7 +185,7 @@ class TrainPPO(EnvInterface):
             # --- LEARNING PHASE ---
             # If the rollout buffer is full, trigger the learning update
             if self.rl_agent.mem_idx == self.rl_agent.n_steps:
-                self.rl_agent.learn(state.reshape(1,-1), agent_done)
+                self.rl_agent.learn(state.reshape(1,-1), done)
                 self.get_logger().info(f"--- Learning Update at Timestep {t} ---")
 
                 # Periodically save the model
