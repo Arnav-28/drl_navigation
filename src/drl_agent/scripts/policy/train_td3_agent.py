@@ -53,7 +53,7 @@ class TrainTD3(EnvInterface):
         )
 
         # Setup directories for saving models, results and logs
-        temp_dir_path = os.path.join(drl_agent_src_path, "drl_agent", "temp")
+        temp_dir_path = os.path.join(drl_agent_src_path, "drl_agent", "temp_td3")
         self.pytorch_models_dir = os.path.join(temp_dir_path, "pytorch_models")
         self.final_models_dir = os.path.join(temp_dir_path, "final_models")
         self.results_dir = os.path.join(temp_dir_path, "results")
