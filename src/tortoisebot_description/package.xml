@@ -4,7 +4,7 @@
   <name>tortoisebot_description</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="shubhamnandi12@gmail.com">sub22</maintainer>
+  <maintainer email="tijarearnav@gmail.com">sub22</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
