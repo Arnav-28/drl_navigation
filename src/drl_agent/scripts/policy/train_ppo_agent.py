@@ -163,13 +163,27 @@ class TrainPPO(EnvInterface):
             # Note: PPO's actions are sampled, so we pass the numpy version to the env
             next_state, reward, done, _ = self.step(action.cpu().numpy().flatten())
 
-            # Store the collected experience
-            self.rl_agent.store_transition(state, action.flatten(), log_prob.flatten(), reward, done, value)
-
-            ep_total_reward += reward
+            # We'll use a new variable for the final reward
+            final_reward = reward
             ep_timesteps += 1
+            
+            # Check if the episode is ending ONLY because of the time limit
+            is_timeout = (ep_timesteps >= self.max_episode_steps)
+            
+            if is_timeout and not done:
+                self.get_logger().info(f"{'Max episode steps reached, applying penalty.':-^50}")
+                final_reward = -100.0  # Override the last reward with a penalty
 
-            episode_is_done = done or (ep_timesteps >= self.max_episode_steps)
+            # The 'done' flag passed here should be the original one from the environment
+            # This is important for PPO's value calculation (GAE).
+            self.rl_agent.store_transition(state, action.flatten(), log_prob.flatten(), final_reward, done, value)
+
+            # Update the total reward for logging with the final reward
+            ep_total_reward += final_reward
+
+            # Now, determine if the episode should be reset
+            episode_is_done = done or is_timeout
+
             state = torch.tensor(next_state, dtype=torch.float32, device=self.rl_agent.device)
             if episode_is_done:
                 self.get_logger().info(f"Total T: {t+1} Episode Num: {ep_num} Episode T: {ep_timesteps} Reward: {ep_total_reward:.3f}")

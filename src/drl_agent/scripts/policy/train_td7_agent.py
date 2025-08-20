@@ -7,14 +7,14 @@ import time
 from datetime import date
 import torch
 import numpy as np
-from td3_agent import Agent
+from td7_agent import Agent
 import csv
 from environment_interface import EnvInterface
 from file_manager import DirectoryManager, load_yaml
 
-class TrainTD3(EnvInterface):
+class TrainTD7(EnvInterface):
     def __init__(self):
-        super().__init__("train_td3_node")
+        super().__init__("train_td7_node")
 
         # Load training config parameters
         drl_agent_src_path_env = "DRL_AGENT_SRC_PATH"
@@ -26,7 +26,7 @@ class TrainTD3(EnvInterface):
         drl_agent_pkg_path = os.path.join(drl_agent_src_path, "drl_agent")
 
         self.hyperparameters_path = os.path.join(
-            drl_agent_pkg_path, "config", "hyperparameters_td3.yaml"
+            drl_agent_pkg_path, "config", "hyperparameters_td7.yaml"
         )
         self.train_config_file_path = os.path.join(
             drl_agent_pkg_path, "config", "train_config.yaml"
@@ -53,7 +53,7 @@ class TrainTD3(EnvInterface):
         )
 
         # Setup directories for saving models, results and logs
-        temp_dir_path = os.path.join(drl_agent_src_path, "drl_agent", "temp_td3")
+        temp_dir_path = os.path.join(drl_agent_src_path, "drl_agent", "temp_td7")
         self.pytorch_models_dir = os.path.join(temp_dir_path, "pytorch_models")
         self.final_models_dir = os.path.join(temp_dir_path, "final_models")
         self.results_dir = os.path.join(temp_dir_path, "results")
@@ -167,18 +167,10 @@ class TrainTD3(EnvInterface):
             # Act
             next_state, reward, ep_finished, _ = self.step(action)
 
+            ep_total_reward += reward
             ep_timesteps += 1
 
-            if ep_timesteps == self.max_episode_steps:
-                self.get_logger().info(f"{'Max episode steps reached, applying penalty.':-^50}")
-                reward = -100.0
-                ep_finished = True
-            
-            ep_total_reward += reward
-
-            # The 'done' flag tells the learning algorithm if it's a true terminal state.
-            # For a timeout, we want the agent to know the episode ended.
-            done = float(ep_finished)
+            done = float(ep_finished) if ep_timesteps < self.max_episode_steps else 0
             self.rl_agent.replay_buffer.add(state, action, next_state, reward, done)
 
             state = next_state
@@ -246,17 +238,17 @@ def main(args=None):
     # Initialize the ROS2 communication
     rclpy.init(args=args)
     # Initialize the node
-    train_td3_node = TrainTD3()
+    train_td7_node = TrainTD7()
     # Start training
-    train_td3_node.train_online()
+    train_td7_node.train_online()
     try:
-        while rclpy.ok() and not train_td3_node.done_training:
-            rclpy.spin_once(train_td3_node)
+        while rclpy.ok() and not train_td7_node.done_training:
+            rclpy.spin_once(train_td7_node)
     except KeyboardInterrupt as e:
-        train_td3_node.get_logger().warning(f"KeyboardInterrupt: {e}")
+        train_td7_node.get_logger().warning(f"KeyboardInterrupt: {e}")
     finally:
-        train_td3_node.get_logger().info("rclpy, shutting down...")
-        train_td3_node.destroy_node()
+        train_td7_node.get_logger().info("rclpy, shutting down...")
+        train_td7_node.destroy_node()
         rclpy.shutdown()
 
 
